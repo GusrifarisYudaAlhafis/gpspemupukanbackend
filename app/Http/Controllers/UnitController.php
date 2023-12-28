@@ -30,7 +30,7 @@ class UnitController extends Controller
                 'blok' => 'required|max:5',
                 'longitude' => 'required',
                 'latitude' => 'required',
-                'polygon' => 'required'
+                'polygon' => 'required',
             ]);
             $unit = Unit::create([
                 'user_id' => $request->user,
@@ -41,8 +41,9 @@ class UnitController extends Controller
                 'longitude' => $request->longitude,
                 'latitude' => $request->latitude,
                 'polygon' => $request->polygon,
-                'created_by' => auth()->id
+                'created_by' => auth()->id,
             ]);
+
             return UnitResource::make($unit);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()]);
@@ -71,7 +72,7 @@ class UnitController extends Controller
                 'blok' => 'required|max:5',
                 'longitude' => 'required',
                 'latitude' => 'required',
-                'polygon' => 'required'
+                'polygon' => 'required',
             ]);
             $unit->update([
                 'user_id' => $request->user,
@@ -82,8 +83,9 @@ class UnitController extends Controller
                 'longitude' => $request->longitude,
                 'latitude' => $request->latitude,
                 'polygon' => $request->polygon,
-                'updated_by' => auth()->id
+                'updated_by' => auth()->id,
             ]);
+
             return UnitResource::make($unit);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()]);
@@ -98,9 +100,26 @@ class UnitController extends Controller
         try {
             $this->authorize('delete', $unit);
             $unit->delete();
+
             return response()->json(['success' => 'Unit deleted successfully']);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage()]);
         }
+    }
+
+    public function polygon(Request $request)
+    {
+        $data = auth()->user()->units()->pluck('polygon')->map(function ($item) {
+            $polygonObject = json_decode($item);
+
+            return collect($polygonObject->coordinates[0])->map(function ($i) {
+                return (object) [
+                    'lat' => $i[1] ?? null,
+                    'lng' => $i[0] ?? null,
+                ];
+            })->toArray() ?? null;
+        })->toArray();
+
+        return response()->json($data);
     }
 }

@@ -27,5 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('tracker-count', [DeviceController::class, 'trackerCount']);
     Route::apiResource('tracks', TrackController::class);
     Route::get('imei', [TrackController::class, 'imei']);
+    Route::get('polygon', [UnitController::class, 'polygon']);
     Route::apiResource('units', UnitController::class);
 });
